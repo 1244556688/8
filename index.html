@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>音樂播放器 + 進度條 + 背景色調變化</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    overflow: hidden;
+    color: #e0e7ff;
+    user-select: none;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  #background-gradient {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #5a72e8, #0a0f33);
+    filter: blur(60px);
+    z-index: 0;
+    transition: background 1s ease;
+  }
+  #stage { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; }
+  #spectrumRow { position: fixed; bottom: 0; left: 0; right: 0; height: 140px; z-index: 3; }
+  #playlist {
+    position: fixed;
+    top: 80px; right: 20px;
+    width: 280px; max-height: 70vh;
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    border-radius: 16px; padding: 16px;
+    overflow-y: auto; color: #d1d5db;
+    z-index: 10;
+  }
+  #playlist h3 { margin: 0 0 12px; font-weight: 600; font-size: 1.25rem; color: #a5b4fc; text-align: center; }
+  #playlist button {
+    background: transparent; border: none; color: #d1d5db;
+    width: 100%; padding: 10px 12px; margin-bottom: 8px;
+    border-radius: 10px; text-align: left; font-weight: 500;
+    font-size: 1rem; cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  #playlist button.active, #playlist button:hover {
+    background: #6366f1; color: white; box-shadow: 0 0 12px #6366f1;
+  }
+  #controls {
+    position: fixed; top: 20px; right: 20px;
+    z-index: 12; background: rgba(15, 23, 42, 0.85);
+    padding: 12px 20px; border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+    max-width: 440px;
+  }
+  #controls input[type="file"] { display: none; }
+  #upload-label {
+    background: #4f46e5; padding: 10px 20px; border-radius: 9999px;
+    font-weight: 600; color: white; cursor: pointer;
+    box-shadow: 0 0 10px #4f46e5; transition: background 0.3s;
+  }
+  #upload-label:hover { background: #4338ca; }
+  #toggle {
+    background: linear-gradient(90deg, #8b5cf6, #4f46e5);
+    border: none; padding: 10px 24px; border-radius: 9999px;
+    font-weight: 700; color: white; cursor: pointer;
+    box-shadow: 0 0 14px #8b5cf6; transition: background 0.3s;
+  }
+  #toggle:hover { background: #7c3aed; }
+  #delete-btn {
+    background: #e11d48; border: none; padding: 10px 24px; border-radius: 9999px;
+    font-weight: 700; color: white; cursor: pointer;
+    box-shadow: 0 0 14px #e11d48; transition: background 0.3s;
+  }
+  #delete-btn:hover { background: #b91c1c; }
+  #nowPlaying {
+    position: fixed; bottom: 220px; right: 320px; z-index: 15;
+    color: #a5b4fc; font-weight: 600; font-size: 1.2rem;
+    text-shadow: 0 0 8px #7c3aed; max-width: 300px;
+    user-select: none; pointer-events: none;
+  }
+  #drop-overlay {
+    position: fixed; inset: 0; background: rgba(124, 58, 237, 0.15);
+    backdrop-filter: blur(6px); color: #7c3aed; font-size: 2rem;
+    display: none; align-items: center; justify-content: center;
+    user-select: none; z-index: 9999; font-weight: 700;
+  }
+  #topLeftText {
+    position: fixed; top: 10px; left: 10px; max-width: 300px;
+    color: #e0e7ff; font-weight: 600; font-size: 0.9rem;
+    background: rgba(15, 23, 42, 0.6); padding: 12px;
+    border-radius: 10px; line-height: 1.4;
+    font-family: 'Poppins', sans-serif;
+    user-select: none; pointer-events: none; z-index: 20;
+  }
+  #progressContainer { flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
+  #progressBar {
+    -webkit-appearance: none; width: 100%; height: 8px; border-radius: 10px;
+    background: #444c6a; cursor: pointer;
+  }
+  #progressBar::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: #7c3aed; cursor: pointer; box-shadow: 0 0 8px #7c3aed; border: none; margin-top: -5px;
+  }
+  #progressBar::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #7c3aed; cursor: pointer; border: none; box-shadow: 0 0 8px #7c3aed;
+  }
+  #timeDisplay {
+    color: #a5b4fc; font-weight: 600; font-size: 0.9rem; text-align: right;
+    user-select: none; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<div id="background-gradient"></div>
+<div id="topLeftText">
+  用法介紹:<br />
+  1. 直接把檔案拖進來。<br />
+  2. 點右上角「新增檔案」加入音樂。<br />
+  3. 播放清單自動播放，不必逐一點。<br />
+  4. 點「刪除選中歌曲」可刪除目前播放歌曲。<br />
+</div>
+<canvas id="stage"></canvas>
+<canvas id="spectrumRow"></canvas>
+<div id="playlist" aria-label="播放清單">
+  <h3>播放清單</h3>
+  <!-- 預設示範歌曲 -->
+  <button data-url="https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Scott_Holmes/Corporate__Motivational_Music/Scott_Holmes_-_01_-_Inspiring_Corporate.mp3">
+    示範歌曲 - Inspiring Corporate
+  </button>
+</div>
+<div id="controls">
+  <label for="fileInput" id="upload-label" tabindex="0">＋ 上傳音樂</label>
+  <input type="file" id="fileInput" accept="audio/*" multiple />
+  <button id="toggle">播放 / 暫停</button>
+  <button id="delete-btn">刪除選中歌曲</button>
+  <div id="progressContainer">
+    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" aria-label="播放進度條" />
+    <div id="timeDisplay">00:00 / 00:00</div>
+  </div>
+</div>
+<div id="nowPlaying">尚未播放</div>
+<div id="drop-overlay">放開檔案加入音樂</div>
+
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const spectrumRow = document.getElementById('spectrumRow');
+  const stageCtx = stage.getContext('2d');
+  const rowCtx = spectrumRow.getContext('2d');
+  const playlistEl = document.getElementById('playlist');
+  const nowPlayingEl = document.getElementById('nowPlaying');
+  const toggleBtn = document.getElementById('toggle');
+  const deleteBtn = document.getElementById('delete-btn');
+  const fileInput = document.getElementById('fileInput');
+  const dropOverlay = document.getElementById('drop-overlay');
+  const progressBar = document.getElementById('progressBar');
+  const timeDisplay = document.getElementById('timeDisplay');
+  let audioCtx, analyser, source;
+  let dataArray, bufferLength;
+  let audio = new Audio();
+  audio.crossOrigin = "anonymous";
+  audio.volume = 0.85;
+  let raf;
+  let playlist = [];
+  let current = 0;
+  let isPlaying = false;
+
+  // 預設示範歌曲
+  document.querySelectorAll('#playlist button[data-url]').forEach(btn => {
+    const url = btn.getAttribute('data-url');
+    const name = btn.textContent;
+    playlist.push({ url, name });
+    btn.addEventListener('click', () => {
+      current = playlist.findIndex(track => track.url === url);
+      loadCurrentTrack();
+      playAudio();
+      changeTheme(current);
+      renderPlaylist();
+    });
+  });
+
+  // ...（這裡保留你原本的 draw、renderPlaylist、playAudio 等完整程式碼）
+})();
+</script>
+</body>
+</html>
