@@ -7,26 +7,30 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
   html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    font-family: 'Poppins', sans-serif; background: #0f172a; color: white;
+    display: flex; justify-content: center; align-items: center;
     overflow: hidden;
-    color: #e0e7ff;
-    user-select: none;
   }
-  body { display: flex; flex-direction: column; }
 
-  /* 封面圖 */
+  #player-container {
+    position: relative;
+    width: 360px;
+    background: rgba(30, 41, 59, 0.8);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    text-align: center;
+    z-index: 10;
+  }
+
   #cover-container {
-    position: fixed;
-    bottom: 220px;
-    right: 20px;
     width: 260px;
     height: 260px;
+    margin: 0 auto 20px auto;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    z-index: 15;
     background: rgba(15, 23, 42, 0.6);
     display: flex;
     align-items: center;
@@ -38,212 +42,127 @@
     object-fit: cover;
   }
 
-  #background-gradient {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, #5a72e8, #0a0f33);
-    filter: blur(60px);
-    z-index: 0;
-    transition: background 1s ease;
-  }
-  #stage {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    z-index: 1;
-  }
-  #spectrumRow {
-    position: fixed;
-    bottom: 0; left: 0; right: 0;
-    height: 140px;
-    z-index: 3;
-  }
-  #playlist {
-    position: fixed;
-    top: 80px; right: 320px;
-    width: 280px;
-    max-height: 70vh;
-    background: rgba(15, 23, 42, 0.85);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-    border-radius: 16px;
-    padding: 16px;
-    overflow-y: auto;
-    color: #d1d5db;
-    z-index: 10;
-  }
-  #playlist h3 {
-    margin: 0 0 12px;
-    font-weight: 600;
-    font-size: 1.25rem;
-    color: #a5b4fc;
-    text-align: center;
-  }
-  #playlist button {
-    background: transparent;
+  #controls button {
+    background: #1e293b;
     border: none;
-    color: #d1d5db;
+    color: white;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+  }
+  #controls button:hover {
+    background: #334155;
+  }
+
+  #progress-bar {
     width: 100%;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    border-radius: 10px;
-    text-align: left;
-    font-weight: 500;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.3s, color 0.3s;
+    margin-top: 10px;
   }
-  #playlist button.active,
-  #playlist button:hover {
-    background: #6366f1;
-    color: white;
-    box-shadow: 0 0 12px #6366f1;
+
+  #now-playing {
+    margin-top: 10px;
+    font-size: 14px;
+    opacity: 0.8;
   }
-  #controls {
-    position: fixed;
-    top: 20px; right: 20px;
-    z-index: 12;
-    background: rgba(15, 23, 42, 0.85);
-    padding: 12px 20px;
-    border-radius: 20px;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    flex-wrap: wrap;
-    max-width: 440px;
+
+  #time-display {
+    font-size: 12px;
+    margin-top: 5px;
+    opacity: 0.7;
   }
-  #controls input[type="file"] { display: none; }
-  #upload-label {
-    background: #4f46e5;
-    padding: 10px 20px;
-    border-radius: 9999px;
-    font-weight: 600;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 0 10px #4f46e5;
-    transition: background 0.3s;
-  }
-  #upload-label:hover { background: #4338ca; }
-  #toggle {
-    background: linear-gradient(90deg, #8b5cf6, #4f46e5);
-    border: none;
-    padding: 10px 24px;
-    border-radius: 9999px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 0 14px #8b5cf6;
-    transition: background 0.3s;
-  }
-  #toggle:hover { background: #7c3aed; }
-  #delete-btn {
-    background: #e11d48;
-    border: none;
-    padding: 10px 24px;
-    border-radius: 9999px;
-    font-weight: 700;
-    color: white;
-    cursor: pointer;
-    user-select: none;
-    box-shadow: 0 0 14px #e11d48;
-    transition: background 0.3s;
-  }
-  #delete-btn:hover { background: #b91c1c; }
-  #nowPlaying {
-    position: fixed;
-    bottom: 500px; right: 320px;
-    z-index: 15;
-    color: #a5b4fc;
-    font-weight: 600;
-    font-size: 1.2rem;
-    text-shadow: 0 0 8px #7c3aed;
-    max-width: 300px;
-    user-select: none;
-    pointer-events: none;
-  }
-  /* 進度條 */
-  #progressContainer {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  #progressBar {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 8px;
-    border-radius: 10px;
-    background: #444c6a;
-    cursor: pointer;
-  }
-  #progressBar::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: #7c3aed;
-    cursor: pointer;
-    box-shadow: 0 0 8px #7c3aed;
-    border: none;
-    margin-top: -5px;
-  }
-  #timeDisplay {
-    color: #a5b4fc;
-    font-weight: 600;
-    font-size: 0.9rem;
-    text-align: right;
-    user-select: none;
-    pointer-events: none;
-  }
+
 </style>
 </head>
 <body>
-<div id="background-gradient"></div>
+  <div id="player-container">
+    <div id="cover-container">
+      <img id="cover-image" src="default-cover.jpg" alt="專輯封面">
+    </div>
 
-<!-- 封面圖 -->
-<div id="cover-container">
-  <img id="cover-image" src="default-cover.jpg" alt="專輯封面">
-</div>
-
-<canvas id="stage"></canvas>
-<canvas id="spectrumRow"></canvas>
-
-<div id="playlist" aria-label="播放清單">
-  <h3>播放清單</h3>
-</div>
-
-<div id="controls">
-  <label for="fileInput" id="upload-label" tabindex="0">＋ 上傳音樂</label>
-  <input type="file" id="fileInput" accept="audio/*" multiple />
-  <button id="toggle">播放 / 暫停</button>
-  <button id="delete-btn">刪除選中歌曲</button>
-  <div id="progressContainer">
-    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1"/>
-    <div id="timeDisplay">00:00 / 00:00</div>
+    <div id="controls">
+      <button id="prev">⏮️</button>
+      <button id="play">▶️</button>
+      <button id="next">⏭️</button>
+    </div>
+    <input type="range" id="progress-bar" value="0" min="0" max="100">
+    <div id="now-playing">尚未播放</div>
+    <div id="time-display">00:00 / 00:00</div>
   </div>
-</div>
-<div id="nowPlaying">尚未播放</div>
 
-<script>
-(() => {
-  const coverImage = document.getElementById('cover-image');
-  let audio = new Audio();
-  let playlist = [];
-  let current = 0;
+  <script>
+    const playlist = [
+      { name: "歌曲1", url: "music1.mp3", cover: "cover1.jpg" },
+      { name: "歌曲2", url: "music2.mp3", cover: "cover2.jpg" },
+      { name: "歌曲3", url: "music3.mp3", cover: "cover3.jpg" }
+    ];
 
-  function loadCurrentTrack() {
-    if (!playlist[current]) return;
-    audio.src = playlist[current].url;
-    document.getElementById('nowPlaying').textContent = `正在播放: ${playlist[current].name}`;
-    
-    // 這裡更新封面圖
-    coverImage.src = "default-cover.jpg"; 
-  }
+    const audio = new Audio();
+    let current = 0;
 
-  // 其他原本的 JS 邏輯照舊...
-})();
-</script>
+    const playBtn = document.getElementById("play");
+    const prevBtn = document.getElementById("prev");
+    const nextBtn = document.getElementById("next");
+    const progressBar = document.getElementById("progress-bar");
+    const nowPlayingEl = document.getElementById("now-playing");
+    const timeDisplay = document.getElementById("time-display");
+    const coverImage = document.getElementById("cover-image");
+
+    function loadCurrentTrack() {
+      const track = playlist[current];
+      audio.src = track.url;
+      nowPlayingEl.textContent = `正在播放: ${track.name}`;
+      coverImage.src = track.cover || "default-cover.jpg";
+    }
+
+    function updateTimeDisplay(currentTime, duration) {
+      function fmt(t) {
+        const m = Math.floor(t / 60);
+        const s = Math.floor(t % 60);
+        return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+      }
+      timeDisplay.textContent = `${fmt(currentTime)} / ${fmt(duration)}`;
+    }
+
+    playBtn.addEventListener("click", () => {
+      if (audio.paused) {
+        audio.play();
+        playBtn.textContent = "⏸️";
+      } else {
+        audio.pause();
+        playBtn.textContent = "▶️";
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      current = (current - 1 + playlist.length) % playlist.length;
+      loadCurrentTrack();
+      audio.play();
+      playBtn.textContent = "⏸️";
+    });
+
+    nextBtn.addEventListener("click", () => {
+      current = (current + 1) % playlist.length;
+      loadCurrentTrack();
+      audio.play();
+      playBtn.textContent = "⏸️";
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration) {
+        progressBar.value = (audio.currentTime / audio.duration) * 100;
+        updateTimeDisplay(audio.currentTime, audio.duration);
+      }
+    });
+
+    progressBar.addEventListener("input", () => {
+      if (audio.duration) {
+        audio.currentTime = (progressBar.value / 100) * audio.duration;
+      }
+    });
+
+    loadCurrentTrack();
+  </script>
 </body>
 </html>
