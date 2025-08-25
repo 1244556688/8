@@ -7,30 +7,148 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
   html, body {
-    margin: 0; padding: 0; height: 100%; width: 100%;
-    font-family: 'Poppins', sans-serif; background: #0f172a; color: white;
-    display: flex; justify-content: center; align-items: center;
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
     overflow: hidden;
+    color: #e0e7ff;
+    user-select: none;
+  }
+  body {
+    display: flex;
+    flex-direction: column;
+  }
+  #background-gradient {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center, #5a72e8, #0a0f33);
+    filter: blur(60px);
+    z-index: 0;
+    transition: background 1s ease;
+  }
+  #stage {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 1;
+  }
+  #spectrumRow {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 140px;
+    z-index: 3;
   }
 
-  #player-container {
-    position: relative;
-    width: 360px;
-    background: rgba(30, 41, 59, 0.8);
+  /* 播放清單（右上）*/
+  #playlist {
+    position: fixed;
+    top: 80px; right: 20px;
+    width: 280px;
+    max-height: 70vh;
+    background: rgba(15, 23, 42, 0.85);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
     border-radius: 16px;
-    padding: 20px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.6);
-    text-align: center;
+    padding: 16px;
+    overflow-y: auto;
+    color: #d1d5db;
     z-index: 10;
   }
+  #playlist h3 {
+    margin: 0 0 12px;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: #a5b4fc;
+    text-align: center;
+  }
+  #playlist button {
+    background: transparent;
+    border: none;
+    color: #d1d5db;
+    width: 100%;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    text-align: left;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  #playlist button.active,
+  #playlist button:hover {
+    background: #6366f1;
+    color: white;
+    box-shadow: 0 0 12px #6366f1;
+  }
 
+  /* 控制區（右上） */
+  #controls {
+    position: fixed;
+    top: 20px; right: 20px;
+    z-index: 12;
+    background: rgba(15, 23, 42, 0.85);
+    padding: 12px 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    max-width: 440px;
+  }
+  #controls input[type="file"] {
+    display: none;
+  }
+  #upload-label {
+    background: #4f46e5;
+    padding: 10px 20px;
+    border-radius: 9999px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 0 10px #4f46e5;
+    transition: background 0.3s;
+  }
+  #upload-label:hover { background: #4338ca; }
+  #toggle {
+    background: linear-gradient(90deg, #8b5cf6, #4f46e5);
+    border: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 0 14px #8b5cf6;
+    transition: background 0.3s;
+  }
+  #toggle:hover { background: #7c3aed; }
+  #delete-btn {
+    background: #e11d48;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 9999px;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 0 0 14px #e11d48;
+    transition: background 0.3s;
+  }
+  #delete-btn:hover { background: #b91c1c; }
+
+  /* 封面（放在播放清單左側）*/
   #cover-container {
+    position: fixed;
+    bottom: 220px;
+    right: 320px; /* 留下 20 + 280 = 300-ish 給播放清單 */
     width: 260px;
     height: 260px;
-    margin: 0 auto 20px auto;
     border-radius: 16px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    z-index: 15;
     background: rgba(15, 23, 42, 0.6);
     display: flex;
     align-items: center;
@@ -42,127 +160,532 @@
     object-fit: cover;
   }
 
-  #controls button {
-    background: #1e293b;
-    border: none;
-    color: white;
-    padding: 10px 15px;
-    margin: 5px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
-  }
-  #controls button:hover {
-    background: #334155;
+  #nowPlaying {
+    position: fixed;
+    bottom: 500px; right: 320px;
+    z-index: 15;
+    color: #a5b4fc;
+    font-weight: 600;
+    font-size: 1.2rem;
+    text-shadow: 0 0 8px #7c3aed;
+    max-width: 300px;
+    user-select: none;
+    pointer-events: none;
   }
 
-  #progress-bar {
+  #drop-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(124, 58, 237, 0.15);
+    backdrop-filter: blur(6px);
+    color: #7c3aed;
+    font-size: 2rem;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+    z-index: 9999;
+    font-weight: 700;
+  }
+  #topLeftText {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    max-width: 300px;
+    color: #e0e7ff;
+    font-weight: 600;
+    font-size: 0.9rem;
+    user-select: none;
+    z-index: 20;
+    pointer-events: none;
+    background: rgba(15, 23, 42, 0.6);
+    padding: 12px;
+    border-radius: 10px;
+    line-height: 1.4;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* 新增進度條和時間顯示 */
+  #progressContainer {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #progressBar {
+    -webkit-appearance: none;
     width: 100%;
-    margin-top: 10px;
+    height: 8px;
+    border-radius: 10px;
+    background: #444c6a;
+    cursor: pointer;
+  }
+  #progressBar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #7c3aed;
+    cursor: pointer;
+    box-shadow: 0 0 8px #7c3aed;
+    border: none;
+    margin-top: -5px;
+  }
+  #progressBar::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #7c3aed;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px #7c3aed;
+  }
+  #timeDisplay {
+    color: #a5b4fc;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: right;
+    user-select: none;
+    pointer-events: none;
   }
 
-  #now-playing {
-    margin-top: 10px;
-    font-size: 14px;
-    opacity: 0.8;
-  }
-
-  #time-display {
-    font-size: 12px;
-    margin-top: 5px;
-    opacity: 0.7;
-  }
-
+  /* 隱藏的歌詞容器（避免 JS 錯誤） */
+  #lyricsContainer { display: none; }
 </style>
 </head>
 <body>
-  <div id="player-container">
-    <div id="cover-container">
-      <img id="cover-image" src="default-cover.jpg" alt="專輯封面">
-    </div>
+<div id="background-gradient"></div>
+<div id="topLeftText">
+  用法介紹:<br />
+  1.你可以直接把檔案拖過來這裡。<br />
+  2.你可以點右上角的新增檔案來新增音樂或封面圖片（同時上傳圖片可對應封面）。<br />
+  3.播放清單會自動播放，無須點擊檔案。<br />
+  4.點選「刪除選中歌曲」按鈕可刪除目前播放的歌曲。<br />
+</div>
 
-    <div id="controls">
-      <button id="prev">⏮️</button>
-      <button id="play">▶️</button>
-      <button id="next">⏭️</button>
-    </div>
-    <input type="range" id="progress-bar" value="0" min="0" max="100">
-    <div id="now-playing">尚未播放</div>
-    <div id="time-display">00:00 / 00:00</div>
+<!-- 封面 -->
+<div id="cover-container">
+  <img id="cover-image" src="default-cover.jpg" alt="專輯封面">
+</div>
+
+<canvas id="stage"></canvas>
+<canvas id="spectrumRow"></canvas>
+
+<div id="playlist" aria-label="播放清單">
+  <h3>播放清單</h3>
+  <!-- 按鈕由 JS 插入 -->
+</div>
+
+<div id="controls">
+  <label for="fileInput" id="upload-label" tabindex="0">＋ 上傳音樂 / 圖片</label>
+  <!-- 允許同時上傳音訊與圖片 -->
+  <input type="file" id="fileInput" accept="audio/*,image/*" multiple />
+  <button id="toggle">播放 / 暫停</button>
+  <button id="delete-btn">刪除選中歌曲</button>
+
+  <div id="progressContainer">
+    <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" aria-label="播放進度條" />
+    <div id="timeDisplay" aria-live="polite" aria-atomic="true">00:00 / 00:00</div>
   </div>
+</div>
 
-  <script>
-    const playlist = [
-      { name: "歌曲1", url: "music1.mp3", cover: "cover1.jpg" },
-      { name: "歌曲2", url: "music2.mp3", cover: "cover2.jpg" },
-      { name: "歌曲3", url: "music3.mp3", cover: "cover3.jpg" }
-    ];
+<div id="nowPlaying" aria-live="polite" aria-atomic="true">尚未播放</div>
+<div id="drop-overlay">放開檔案加入音樂</div>
 
-    const audio = new Audio();
-    let current = 0;
+<!-- 隱藏歌詞容器（避免原本 JS 找不到元素） -->
+<div id="lyricsContainer"></div>
 
-    const playBtn = document.getElementById("play");
-    const prevBtn = document.getElementById("prev");
-    const nextBtn = document.getElementById("next");
-    const progressBar = document.getElementById("progress-bar");
-    const nowPlayingEl = document.getElementById("now-playing");
-    const timeDisplay = document.getElementById("time-display");
-    const coverImage = document.getElementById("cover-image");
+<script>
+(() => {
+  const stage = document.getElementById('stage');
+  const spectrumRow = document.getElementById('spectrumRow');
+  const stageCtx = stage.getContext('2d');
+  const rowCtx = spectrumRow.getContext('2d');
+  const playlistEl = document.getElementById('playlist');
+  const nowPlayingEl = document.getElementById('nowPlaying');
+  const toggleBtn = document.getElementById('toggle');
+  const deleteBtn = document.getElementById('delete-btn');
+  const fileInput = document.getElementById('fileInput');
+  const dropOverlay = document.getElementById('drop-overlay');
+  const lyricsContainer = document.getElementById('lyricsContainer');
+  const progressBar = document.getElementById('progressBar');
+  const timeDisplay = document.getElementById('timeDisplay');
+  const coverImage = document.getElementById('cover-image');
 
-    function loadCurrentTrack() {
-      const track = playlist[current];
-      audio.src = track.url;
-      nowPlayingEl.textContent = `正在播放: ${track.name}`;
-      coverImage.src = track.cover || "default-cover.jpg";
+  let audioCtx, analyser, source;
+  let dataArray, bufferLength;
+  let audio = new Audio();
+  audio.crossOrigin = "anonymous";
+  audio.volume = 0.85;
+  let raf;
+  let playlist = []; // { url, name, file, cover (url or null) }
+  let current = 0;
+  let isPlaying = false;
+
+  // 圖片暫存（file.name -> objectURL）
+  const imageMap = {};
+
+  const themeColors = [
+    { bgStart: '#5a72e8', bgEnd: '#0a0f33', ballColor: '173, 216, 230' },
+    { bgStart: '#e16d6d', bgEnd: '#330a0a', ballColor: '255, 99, 71' },
+    { bgStart: '#6de1e1', bgEnd: '#0a3333', ballColor: '64, 224, 208' },
+    { bgStart: '#e1d96d', bgEnd: '#33330a', ballColor: '255, 255, 102' },
+    { bgStart: '#d46de1', bgEnd: '#330a33', ballColor: '216, 112, 255' },
+  ];
+  let currentThemeIndex = 0;
+
+  function resize() {
+    stage.width = window.innerWidth * devicePixelRatio;
+    stage.height = window.innerHeight * devicePixelRatio;
+    stage.style.width = window.innerWidth + 'px';
+    stage.style.height = window.innerHeight + 'px';
+    spectrumRow.width = window.innerWidth * devicePixelRatio;
+    spectrumRow.height = 140 * devicePixelRatio;
+    spectrumRow.style.width = window.innerWidth + 'px';
+    spectrumRow.style.height = '140px';
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  function setupAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 2048;
+      bufferLength = analyser.frequencyBinCount;
+      dataArray = new Uint8Array(bufferLength);
+      source = audioCtx.createMediaElementSource(audio);
+      source.connect(analyser);
+      analyser.connect(audioCtx.destination);
     }
+  }
 
-    function updateTimeDisplay(currentTime, duration) {
-      function fmt(t) {
-        const m = Math.floor(t / 60);
-        const s = Math.floor(t % 60);
-        return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+  // floating balls...
+  const maxFloatingBalls = 50;
+  let floatingBalls = [];
+  function initFloatingBalls() {
+    floatingBalls = [];
+    const ballColor = themeColors[currentThemeIndex].ballColor;
+    for (let i = 0; i < maxFloatingBalls; i++) {
+      floatingBalls.push({
+        x: Math.random() * stage.width,
+        y: Math.random() * stage.height,
+        radius: 5 + Math.random() * 10,
+        alpha: Math.random() * 0.3 + 0.1,
+        speedY: 0.2 + Math.random() * 0.4,
+        alphaSpeed: 0.002 + Math.random() * 0.004,
+        fadingOut: Math.random() > 0.5,
+        color: ballColor,
+      });
+    }
+  }
+
+  function draw() {
+    raf = requestAnimationFrame(draw);
+    if (!analyser) {
+      stageCtx.clearRect(0, 0, stage.width, stage.height);
+      rowCtx.clearRect(0, 0, spectrumRow.width, spectrumRow.height);
+      return;
+    }
+    analyser.getByteFrequencyData(dataArray);
+
+    const bgStart = themeColors[currentThemeIndex].bgStart;
+    const bgEnd = themeColors[currentThemeIndex].bgEnd;
+
+    const bgGradient = stageCtx.createLinearGradient(0, 0, stage.width, stage.height);
+    bgGradient.addColorStop(0, bgStart);
+    bgGradient.addColorStop(1, bgEnd);
+    stageCtx.fillStyle = bgGradient;
+    stageCtx.fillRect(0, 0, stage.width, stage.height);
+
+    const lowFreqCount = Math.floor(bufferLength * 0.1);
+    let lowSum = 0;
+    for (let i = 0; i < lowFreqCount; i++) lowSum += dataArray[i];
+    const lowAvg = lowSum / lowFreqCount / 255;
+    const cx = stage.width / 2;
+    const cy = stage.height / 2 - 80 * devicePixelRatio;
+    const baseRadius = 80 * devicePixelRatio;
+    const radius = baseRadius + lowAvg * 300 * devicePixelRatio;
+    const radialGradient = stageCtx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+    radialGradient.addColorStop(0, `rgba(124, 58, 237, 0.9)`);
+    radialGradient.addColorStop(1, `rgba(67, 56, 202, 0.08)`);
+    stageCtx.beginPath();
+    stageCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+    stageCtx.fillStyle = radialGradient;
+    stageCtx.shadowColor = 'rgba(124, 58, 237, 0.7)';
+    stageCtx.shadowBlur = 30;
+    stageCtx.fill();
+    stageCtx.shadowBlur = 0;
+
+    floatingBalls.forEach(ball => {
+      ball.y -= ball.speedY;
+      if (ball.y + ball.radius < 0) {
+        ball.y = stage.height + ball.radius;
+        ball.x = Math.random() * stage.width;
       }
-      timeDisplay.textContent = `${fmt(currentTime)} / ${fmt(duration)}`;
-    }
-
-    playBtn.addEventListener("click", () => {
-      if (audio.paused) {
-        audio.play();
-        playBtn.textContent = "⏸️";
+      if (ball.fadingOut) {
+        ball.alpha -= ball.alphaSpeed;
+        if (ball.alpha <= 0.1) {
+          ball.alpha = 0.1;
+          ball.fadingOut = false;
+        }
       } else {
-        audio.pause();
-        playBtn.textContent = "▶️";
+        ball.alpha += ball.alphaSpeed;
+        if (ball.alpha >= 0.4) {
+          ball.alpha = 0.4;
+          ball.fadingOut = true;
+        }
       }
+      const grad = stageCtx.createRadialGradient(ball.x, ball.y, ball.radius * 0.1, ball.x, ball.y, ball.radius);
+      grad.addColorStop(0, `rgba(${ball.color},${ball.alpha})`);
+      grad.addColorStop(1, `rgba(${ball.color},0)`);
+      stageCtx.beginPath();
+      stageCtx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+      stageCtx.fillStyle = grad;
+      stageCtx.fill();
     });
 
-    prevBtn.addEventListener("click", () => {
-      current = (current - 1 + playlist.length) % playlist.length;
+    // spectrum
+    const barWidth = spectrumRow.width / bufferLength;
+    rowCtx.clearRect(0, 0, spectrumRow.width, spectrumRow.height);
+    for (let i = 0; i < bufferLength; i++) {
+      const barHeight = dataArray[i] / 255 * spectrumRow.height;
+      const hue = 250 - (i / bufferLength) * 250;
+      rowCtx.fillStyle = `hsl(${hue}, 100%, 70%)`;
+      rowCtx.fillRect(i * barWidth, spectrumRow.height - barHeight, barWidth * 0.8, barHeight);
+    }
+
+    updateProgress();
+    updateLyricsHighlight();
+  }
+
+  function renderPlaylist() {
+    playlistEl.innerHTML = '<h3>播放清單</h3>';
+    playlist.forEach((item, i) => {
+      const btn = document.createElement('button');
+      btn.textContent = item.name;
+      btn.classList.toggle('active', i === current);
+      btn.tabIndex = 0;
+      btn.addEventListener('click', () => {
+        if (current !== i) {
+          current = i;
+          loadCurrentTrack();
+          playAudio();
+          changeTheme(i);
+        }
+      });
+      playlistEl.appendChild(btn);
+    });
+  }
+
+  function loadCurrentTrack() {
+    if (!playlist[current]) return;
+    audio.src = playlist[current].url;
+    nowPlayingEl.textContent = `正在播放: ${playlist[current].name}`;
+    // 更新封面（若 playlist[current].cover 存在就使用，否則用預設）
+    coverImage.src = playlist[current].cover || 'default-cover.jpg';
+    // lyrics 初始化（保留原邏輯）
+    window.lyrics = [];
+    window.lyricsIndex = 0;
+    progressBar.value = 0;
+    updateTimeDisplay(0, 0);
+  }
+
+  function playAudio() {
+    if (!audio.src) return;
+    setupAudio();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    audio.play();
+    isPlaying = true;
+    toggleBtn.textContent = '暫停';
+    draw();
+  }
+  function pauseAudio() {
+    audio.pause();
+    isPlaying = false;
+    toggleBtn.textContent = '播放';
+    cancelAnimationFrame(raf);
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (!audio.src) return alert('請先選擇或上傳音樂');
+    if (isPlaying) pauseAudio();
+    else playAudio();
+  });
+
+  // 上傳檔案（支援音訊與圖片）
+  fileInput.addEventListener('change', (e) => {
+    const files = e.target.files;
+    addFilesToPlaylist(files);
+    fileInput.value = '';
+  });
+
+  // 拖放
+  window.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropOverlay.style.display = 'flex';
+  });
+  window.addEventListener('dragleave', e => {
+    e.preventDefault();
+    dropOverlay.style.display = 'none';
+  });
+  window.addEventListener('drop', e => {
+    e.preventDefault();
+    dropOverlay.style.display = 'none';
+    if (e.dataTransfer.files.length) {
+      addFilesToPlaylist(e.dataTransfer.files);
+    }
+  });
+
+  // 取得檔名不含副檔名
+  function getBaseName(filename) {
+    return filename.replace(/\.[^/.]+$/, "");
+  }
+
+  // 嘗試配對圖片（同名）到音訊檔
+  function matchCovers() {
+    for (let i = 0; i < playlist.length; i++) {
+      if (playlist[i].cover) continue;
+      const base = getBaseName(playlist[i].name);
+      // 常見圖片副檔名列表
+      const exts = ['.jpg', '.jpeg', '.png', '.webp'];
+      for (const ext of exts) {
+        const candidate = base + ext;
+        if (imageMap[candidate]) {
+          playlist[i].cover = imageMap[candidate];
+          break;
+        }
+      }
+      // 若沒找到，也嘗試直接用同名但所有小寫比對
+      if (!playlist[i].cover) {
+        for (const k in imageMap) {
+          if (getBaseName(k).toLowerCase() === base.toLowerCase()) {
+            playlist[i].cover = imageMap[k];
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  function addFilesToPlaylist(files) {
+    // files 可能包含音訊與圖片
+    const arr = Array.from(files);
+    for (const file of arr) {
+      if (file.type.startsWith('audio')) {
+        const url = URL.createObjectURL(file);
+        playlist.push({ url, name: file.name, file, cover: null });
+      } else if (file.type.startsWith('image')) {
+        // 儲存 image objectURL，key 用 file.name（包含副檔名）
+        const iurl = URL.createObjectURL(file);
+        imageMap[file.name] = iurl;
+      }
+    }
+
+    // 嘗試配對圖片給音訊
+    matchCovers();
+
+    if (playlist.length === 1) {
+      current = 0;
       loadCurrentTrack();
-      audio.play();
-      playBtn.textContent = "⏸️";
-    });
+      playAudio();
+      changeTheme(current);
+    }
+    renderPlaylist();
+  }
 
-    nextBtn.addEventListener("click", () => {
-      current = (current + 1) % playlist.length;
-      loadCurrentTrack();
-      audio.play();
-      playBtn.textContent = "⏸️";
-    });
-
-    audio.addEventListener("timeupdate", () => {
-      if (audio.duration) {
-        progressBar.value = (audio.currentTime / audio.duration) * 100;
-        updateTimeDisplay(audio.currentTime, audio.duration);
-      }
-    });
-
-    progressBar.addEventListener("input", () => {
-      if (audio.duration) {
-        audio.currentTime = (progressBar.value / 100) * audio.duration;
-      }
-    });
-
+  deleteBtn.addEventListener('click', () => {
+    if (!playlist[current]) return alert('沒有可刪除的歌曲');
+    // 釋放 URL.createObjectURL 的資源（若有）
+    try { URL.revokeObjectURL(playlist[current].url); } catch (e) {}
+    playlist.splice(current, 1);
+    if (playlist.length === 0) {
+      pauseAudio();
+      audio.src = '';
+      nowPlayingEl.textContent = '播放清單空白';
+      lyricsContainer.textContent = '請播放歌曲以載入歌詞...';
+      renderPlaylist();
+      return;
+    }
+    if (current >= playlist.length) current = playlist.length - 1;
     loadCurrentTrack();
-  </script>
+    playAudio();
+    renderPlaylist();
+  });
+
+  progressBar.addEventListener('input', () => {
+    if (!audio.duration) return;
+    const seekTime = (progressBar.value / 100) * audio.duration;
+    audio.currentTime = seekTime;
+    updateTimeDisplay(seekTime, audio.duration);
+  });
+
+  function updateTimeDisplay(currentSec, totalSec) {
+    function formatTime(sec) {
+      if (isNaN(sec)) return '00:00';
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    }
+    timeDisplay.textContent = `${formatTime(currentSec)} / ${formatTime(totalSec)}`;
+  }
+
+  function updateProgress() {
+    if (!audio.duration) return;
+    const percent = (audio.currentTime / audio.duration) * 100;
+    progressBar.value = percent;
+    updateTimeDisplay(audio.currentTime, audio.duration);
+  }
+
+  audio.addEventListener('ended', () => {
+    current++;
+    if (current >= playlist.length) current = 0;
+    loadCurrentTrack();
+    playAudio();
+    changeTheme(current);
+    renderPlaylist();
+  });
+
+  audio.addEventListener('timeupdate', updateProgress);
+
+  function changeTheme(index) {
+    currentThemeIndex = index % themeColors.length;
+    const theme = themeColors[currentThemeIndex];
+    document.getElementById('background-gradient').style.background = `radial-gradient(circle at center, ${theme.bgStart}, ${theme.bgEnd})`;
+    initFloatingBalls();
+  }
+
+  function renderLyrics() {
+    lyricsContainer.innerHTML = '';
+    (window.lyrics||[]).forEach((line, i) => {
+      const p = document.createElement('p');
+      p.className = 'line';
+      p.textContent = line.text;
+      lyricsContainer.appendChild(p);
+    });
+  }
+  function updateLyricsHighlight() {
+    if (!window.lyrics || !window.lyrics.length) return;
+    let currentTime = audio.currentTime;
+    let i = window.lyrics.findIndex((line, idx) => {
+      return currentTime < line.time;
+    });
+    if (i === -1) i = window.lyrics.length;
+    i = Math.max(0, i - 1);
+    if (window.lyricsIndex !== i) {
+      const lines = lyricsContainer.querySelectorAll('.line');
+      if (lines[window.lyricsIndex]) lines[window.lyricsIndex].classList.remove('active');
+      if (lines[i]) lines[i].classList.add('active');
+      window.lyricsIndex = i;
+    }
+  }
+
+  // 初始化
+  initFloatingBalls();
+  renderPlaylist();
+
+})();
+</script>
 </body>
 </html>
