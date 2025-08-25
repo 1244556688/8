@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>音樂播放器</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-  html, body {
-    margin: 0; padding: 0; height: 100%;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    overflow: hidden;
-    color: #e0e7ff;
-    user-select: none;
-  }
-  body {
-    display: flex;
-    flex-direction: column;
-  }
-  #background-gradient {
-    position: fixed;
-    inset: 0;
-    background: radial-gradient(circle at center, #5a72e8, #0a0f33);
-    filter: blur(60px);
-    z-index: 0;
-    transition: background 1s ease;
-  }
-  #stage {
-    position: fixed
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>音樂播放器</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="background-gradient"></div>
+  <div id="topLeftText">
+    用法介紹:<br />
+    1.你可以直接把檔案拖過來這裡。<br />
+    2.你可以點右上角的新增檔案來新增音樂。<br />
+    3.播放清單會自動播放，無須點擊檔案。<br />
+    4.點選「刪除選中歌曲」按鈕可刪除目前播放的歌曲。<br />
+  </div>
+
+  <canvas id="stage"></canvas>
+  <canvas id="spectrumRow"></canvas>
+
+  <div id="playlist" aria-label="播放清單">
+    <h3>播放清單</h3>
+    <!-- 播放清單由 JS 插入 -->
+  </div>
+
+  <div id="controls">
+    <label for="fileInput" id="upload-label" tabindex="0">＋ 上傳音樂</label>
+    <input type="file" id="fileInput" accept="audio/*" multiple />
+    <button id="toggle">播放 / 暫停</button>
+    <button id="delete-btn">刪除選中歌曲</button>
+
+    <div id="progressContainer">
+      <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" aria-label="播放進度條" />
+      <div id="timeDisplay" aria-live="polite" aria-atomic="true">00:00 / 00:00</div>
+    </div>
+  </div>
+
+  <div id="nowPlaying" aria-live="polite" aria-atomic="true">尚未播放</div>
+  <div id="lyricsContainer">請播放歌曲以載入歌詞...</div>
+  <div id="drop-overlay">放開檔案加入音樂</div>
+
+  <script src="script.js"></script>
+</body>
+</html>
