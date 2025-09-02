@@ -1,45 +1,14 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>音樂播放器</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <div id="background-gradient"></div>
-  <div id="topLeftText">
-    用法介紹:<br />
-    1.你可以直接把檔案拖過來這裡。<br />
-    2.你可以點右上角的新增檔案來新增音樂。<br />
-    3.播放清單會自動播放，無須點擊檔案。<br />
-    4.點選「刪除選中歌曲」按鈕可刪除目前播放的歌曲。<br />
-  </div>
+import React, { useState, useRef } from "react"; import { Button } from "@/components/ui/button"; import { Card, CardContent } from "@/components/ui/card";
 
-  <canvas id="stage"></canvas>
-  <canvas id="spectrumRow"></canvas>
+export default function VideoEditor() { const [videoSrc, setVideoSrc] = useState(null); const videoRef = useRef(null);
 
-  <div id="playlist" aria-label="播放清單">
-    <h3>播放清單</h3>
-    <!-- 播放清單由 JS 插入 -->
-  </div>
+const handleFileChange = (e) => { const file = e.target.files[0]; if (file) { const url = URL.createObjectURL(file); setVideoSrc(url); } };
 
-  <div id="controls">
-    <label for="fileInput" id="upload-label" tabindex="0">＋ 上傳音樂</label>
-    <input type="file" id="fileInput" accept="audio/*" multiple />
-    <button id="toggle">播放 / 暫停</button>
-    <button id="delete-btn">刪除選中歌曲</button>
+const handlePlay = () => { if (videoRef.current) { videoRef.current.play(); } };
 
-    <div id="progressContainer">
-      <input type="range" id="progressBar" min="0" max="100" value="0" step="0.1" aria-label="播放進度條" />
-      <div id="timeDisplay" aria-live="polite" aria-atomic="true">00:00 / 00:00</div>
-    </div>
-  </div>
+const handlePause = () => { if (videoRef.current) { videoRef.current.pause(); } };
 
-  <div id="nowPlaying" aria-live="polite" aria-atomic="true">尚未播放</div>
-  <div id="lyricsContainer">請播放歌曲以載入歌詞...</div>
-  <div id="drop-overlay">放開檔案加入音樂</div>
+const handleTrim = () => { alert("影片剪輯功能尚未實作"); };
 
-  <script src="script.js"></script>
-</body>
-</html>
+return ( <div className="p-4 grid gap-4"> <Card className="p-4"> <CardContent className="flex flex-col items-center gap-4"> <input type="file" accept="video/*" onChange={handleFileChange} /> {videoSrc && ( <video ref={videoRef} src={videoSrc} controls className="rounded-2xl shadow-lg max-w-full" /> )} <div className="flex gap-2"> <Button onClick={handlePlay}>播放</Button> <Button onClick={handlePause}>暫停</Button> <Button onClick={handleTrim}>剪輯</Button> </div> </CardContent> </Card> </div> ); }
+
