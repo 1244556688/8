@@ -1,14 +1,68 @@
-import React, { useState, useRef } from "react"; import { Button } from "@/components/ui/button"; import { Card, CardContent } from "@/components/ui/card";
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的自我介紹</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-export default function VideoEditor() { const [videoSrc, setVideoSrc] = useState(null); const videoRef = useRef(null);
+  <marquee behavior="scroll" direction="left">
+就是一個自我介紹的網頁
+  </marquee>
+  
+<header class="hero">
+  <div class="container">
+    <img src="me.jpg" alt="我的照片" class="profile-img">
+    <h1>大家好，我是justin</h1>
+    <p class="tagline">熱愛程式與設計的創作者</p>
+  </div>
+</header>
 
-const handleFileChange = (e) => { const file = e.target.files[0]; if (file) { const url = URL.createObjectURL(file); setVideoSrc(url); } };
+<main class="container">
+  <section class="about">
+    <h2>關於我</h2>
+    <p>
+      我是一位對程式、設計和科技充滿熱情的人，喜歡用創意解決問題，並不斷學習新技能。
+      目前專注於網頁開發與多媒體應用。
+    </p>
+  </section>
 
-const handlePlay = () => { if (videoRef.current) { videoRef.current.play(); } };
+  <section class="skills">
+    <h2>技能</h2>
+    <ul>
+      <li>HTML / CSS / JavaScript</li>
+      <li>Python 程式設計</li>
+      <li>影像與音效編輯</li>
+    </ul>
+  </section>
 
-const handlePause = () => { if (videoRef.current) { videoRef.current.pause(); } };
+<h1>音樂按鍵</h1>
+<p>點擊按鈕來播放聲音，真的很好聽。</p>
 
-const handleTrim = () => { alert("影片剪輯功能尚未實作"); };
+<button class="btn" onclick="playSound('自我介紹.mp3')">請按這裡!</button>
 
-return ( <div className="p-4 grid gap-4"> <Card className="p-4"> <CardContent className="flex flex-col items-center gap-4"> <input type="file" accept="video/*" onChange={handleFileChange} /> {videoSrc && ( <video ref={videoRef} src={videoSrc} controls className="rounded-2xl shadow-lg max-w-full" /> )} <div className="flex gap-2"> <Button onClick={handlePlay}>播放</Button> <Button onClick={handlePause}>暫停</Button> <Button onClick={handleTrim}>剪輯</Button> </div> </CardContent> </Card> </div> ); }
+<script>
+  function playSound(file) {
+    const audio = new Audio(file);
+    audio.play();
+  }
+</script>
+
+  <section class="contact">
+    <p>新作的網站 音樂播放器: <a href="https://1244556688.github.io/123/">音樂播放器</a></p>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 justin — All rights reserved.</p>
+</footer>
+
+
+</body>
+</html>
+
+
+
 
